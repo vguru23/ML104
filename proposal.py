@@ -120,35 +120,41 @@ with st.expander("Methods: Midterm Report"):
     st.subheader("Data Preprocessing")
     st.write("""The force sensor readings from toilet seat sensors in CSV format, which was organized by each participant and timestamps. 
         Unncessary colums were removed from the data, leaving only the timestamps as well as the four sensor values. 
-        Outliers that were outside the normal range were removed, as well as any invalid sensor reading. 
-        The filtered data was then compiled into a single CSV file. The next step was to calculate the center of pressure 
+        Outliers that were outside the normal range were removed, as well as any invalid sensor reading.""")
+    st.write("""The filtered data was then compiled into a single CSV file. The next step was to calculate the center of pressure 
         for the sensor readings in regards to the X and Y axis. These features will be considered COP_X and COP_Y. This was done by 
         adding up all sensor readings based on the physical layout of the sensors, and dividing it by the sum all 4 sensor readings for 
-        that particular datapoint. Timestamps with missing data/data outside the normal range were removed. Data was labeled based 
-        on the various categories with not being on the seat was considered the default state.
-        The other three categories were onboarding, sitting, and offboard. 
-        The dataset was then labeled by assigning each data point a state based on the timestamp ranges. """)
+        that particular datapoint. Timestamps with missing data/data outside the normal range were removed.""")
+    st.write("""Data was labeled based on the various categories with not being on the seat was considered the default state.
+        The other three categories were onboarding, sitting, and offboard. The dataset was then labeled by assigning each data point a state based on the timestamp ranges. """)
     
 
-    st.subheader("Ml Model")
+    st.subheader("Ml Model: Random Forest")
     st.write("""The first model we decided to implement was the random forest classifier, using scikit-learn's randomforestclassifier method. 
     The three features that were used were Time_Diff_Milliseconds (tracking how much time as passed), COP_X(left to right weight distribution), COP_Y(front and back weight distribution). 
     The hyperparameters specified for the model include estimators at 200, a random_state at 42 (arbitrary randomness metric), and class_weights to have balanced results(higher importance for certain movements). 
     While Training the model, we used 80% 
     of the data for training, while the rest was used as testing data. 
     We also made sure to adjust class weights if needed, 
-    as well as cross valdiate to make sure the model performed well. """)
-
+    as well as cross valdiate to make sure the model performed well.
+    We chose the random forest model because it had the capacity to perform well with non-linear patterns. This non-linear relationship applies to our dataset and the features we had including
+    center of pressure and time differences. It also allowed us to compare how important each of the features were in producing the results given which is important for analysis.
+    The random forest model also allowed us to adjust class weights to better optimize the model to be more accurate and avoid overrepresenting the more frequent classes relative
+    to the lesser ones. These purposes all together is why the Random Forest model was appealing to utilize in this case.""")
 
 with st.expander("Results: Midterm Report"):
     st.subheader("Visualizations")
-    st.write("""A strong diagonal pattern in the confusion matrix indicates good classification, particularly for stable states with high correlation. 
-    The confusion matrix was effective at showing whether or not a participant was sitting on the toilet seat, with some confusion regarding 
+    st.write("""The confusion matrix is one way we can visualize the results of the model depicting the relationship between the predicted label and the true label of the classification.
+    The values in the matrix that provide the most value to us are along the diagonal. A strong diagonal pattern in the confusion matrix indicates good classification, which is generally true in this case.
+    However, the biggest thing to note is the difference between the values for the stable states and the values for the transition states. The sitting and not sitting states had values of 7509 and 13721,
+    respectively on the diagonal signaling high correlation, but the onboarding and offboarding values were just 1333 and 975 which is far worse relatively indicative of poor correlation there.
+    Overall, the confusion matrix was effective at showing whether or not a participant was sitting on the toilet seat, with some confusion regarding 
     whether or not the participant is in a transition state.""") 
 
-    st.write("""The feature importance allows us to see that the Time_Diff_Milliseconds had the highest imporance, 
-    and was more effective in predicting the state of a particpant. As this feature was the most importance, 
-    it allows us to see that changes in sequential movement over time were key in determining different states of the participant. """)
+    st.write("""The feature importance visualization allows us to see that the Time_Diff_Milliseconds had the highest imporance, 
+    and was more effective in predicting the state of a particpant than the center of pressure values. As this feature was the most important, although not by a large margin, 
+    it allows us to see that changes in sequential movement over time were key in determining different states of the participant. It is likely that this will come into play
+    again when the remaining models are implemented and tested.""")
     
 
     st.image("ConfusionMatrix.jpg", caption="Confusion Matrix")
@@ -156,11 +162,26 @@ with st.expander("Results: Midterm Report"):
     st.subheader("Metrics")
     st.image("Metrics.jpg", caption="Metrics")
     st.subheader("Analysis")
-    st.write("""The random forest model was accurate in certain areas, but showed that it could improve in others.
-     Non-transitional state detection showed greater accuracy compared to transition states. 
-    It had difficulty in differentiating similar movement during transition, but was able to do it with moderate accuracy.""")
+    st.write("""Based on the quantitative metrics and visualizations, the random forest model was accurate in certain areas, but showed that it could improve in others.
+     Non-transitional state detection showed greater accuracy compared to transition states. The overall accuracy was nearly 90% but we are relying on the F1 score, the mean of precision and recall values,
+     to provide greater detail. The scores for sitting and not sitting were an outstanding 0.93 and 0.94 but the onboarding and offboarding were only a poor 0.7 and 0.62.
+     
+    It had difficulty in differentiating similar movement during transition, but was able to do it with moderate accuracy. There are a few possible explanations into why the model performed
+     not as well in the transition states. One is the lower representation in the dataset. As it is seen in the support values for each label, the onboarding and offboarding had only 3885 as compared
+     to 22317 for the sitting and non sitting states. This means that the transition states only comprised of less than 15% of the dataset. This is likely playing a factor in the results,
+     allowing the model to be much better trained on some states compared to the others.
+     Another possible reason is overlapping features for the transition states between time difference and the center of pressure values which may be better adjusted to with the other models.""")
+
+    st.write("""The next steps that we plan to take are to implement the other models, Support Vector Machine and Logistic Regression, and run them on our dataset.
+    In a similar fashion to the first one, we will analyze the metrics and visualizations to determine the results of these models. By doing so, we can compare the outcomes to find
+    which model serves the needs for our data best and also understand why this is the case and the implications of any necessary trade-offs.
+    A key change that we plan to carry out is adding features to help the model take into account the previous movement and state to improve on detecting the onbaording
+    and offboarding transition states along with the current timestamp. We predict that this should considerably improve the performance of classification for these states
+    compared to the preliminary results we have seen so far without having features to provide the previous state context information.
+    Another next step is with the usage of timestamps, we want to implement and run a Support Vector Machine model because it is designed to extract meaningful relationships
+    for time series data and that should work well for our dataset considering that we have the ability to use timestamps as a feature.""")
     
-    st.write("""The model was effective in detecting non-transitional states, which were sitting on the seat, and not on the seat. 
+    st.write("""The final verdict in summary is that the model was effective in detecting non-transitional states, which were sitting on the seat, and not on the seat. 
     It was good at classification, but it had lower performance when it came to onboarding and offboarding. """)
 
 
