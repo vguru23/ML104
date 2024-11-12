@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
 
 st.set_page_config(layout="wide")
 
@@ -7,11 +8,11 @@ st.set_page_config(layout="wide")
 data = {
     "Name": ["Saloni Jain", "Sneha Pal", "Sooriya Senthilkumar", "Aneesh Sabarad", "Vibha Guru"],
     "Contribution": [
-        "Worked on Proposal",
-        "Worked on Proposal",
-        "Created Powerpoint and Gantt Chart",
-        "Created Video",
-        "Worked on proposal & Streamlit page"
+        "Worked on M1 Data Cleaning",
+        "Worked on M1 Coding",
+        "Worked on M1 Feature Reduction",
+        "Worked on Results Evaluation",
+        "Worked on M1 Data Visualization"
     ]
 }
 
@@ -114,12 +115,61 @@ with st.expander("Project Goals and Expected Results"):
     For expected results, the model should be able to classify a time range in which a participant is getting on/off the toilet seat.
     """)
 
+#midterm report
+with st.expander("Methods: Midterm Report"):
+    st.subheader("Data Preprocessing")
+    st.write("""The force sensor readings from toilet seat sensors in CSV format, which was organized by each participant and timestamps. 
+        Unncessary colums were removed from the data, leaving only the timestamps as well as the four sensor values. 
+        Outliers that were outside the normal range were removed, as well as any invalid sensor reading. 
+        The filtered data was then compiled into a single CSV file. The next step was to calculate the center of pressure 
+        for the sensor readings in regards to the X and Y axis. These features will be considered COP_X and COP_Y. This was done by 
+        adding up all sensor readings based on the physical layout of the sensors, and dividing it by the sum all 4 sensor readings for 
+        that particular datapoint. Timestamps with missing data/data outside the normal range were removed. Data was labeled based 
+        on the various categories with not being on the seat was considered the default state.
+        The other three categories were onboarding, sitting, and offboard. 
+        The dataset was then labeled by assigning each data point a state based on the timestamp ranges. """)
+    
+
+    st.subheader("Ml Model")
+    st.write("""The first model we decided to implement was the random forest classifier, using scikit-learn's randomforestclassifier method. 
+    The three features that were used were Time_Diff_Milliseconds (tracking how much time as passed), COP_X(left to right weight distribution), COP_Y(front and back weight distribution). 
+    The hyperparameters specified for the model include estimators at 200, a random_state at 42 (arbitrary randomness metric), and class_weights to have balanced results(higher importance for certain movements). 
+    While Training the model, we used 80% 
+    of the data for training, while the rest was used as testing data. 
+    We also made sure to adjust class weights if needed, 
+    as well as cross valdiate to make sure the model performed well. """)
+
+
+with st.expander("Results: Midterm Report"):
+    st.subheader("Visualizations")
+    st.write("""A strong diagonal pattern in the confusion matrix indicates good classification, particularly for stable states with high correlation. 
+    The confusion matrix was effective at showing whether or not a participant was sitting on the toilet seat, with some confusion regarding 
+    whether or not the participant is in a transition state.""") 
+
+    st.write("""The feature importance allows us to see that the Time_Diff_Milliseconds had the highest imporance, 
+    and was more effective in predicting the state of a particpant. As this feature was the most importance, 
+    it allows us to see that changes in sequential movement over time were key in determining different states of the participant. """)
+    
+
+    st.image("ConfusionMatrix.jpg", caption="Confusion Matrix")
+    st.image("FeatureImportance.jpg", caption="Feature Importance")
+    st.subheader("Metrics")
+    st.image("Metrics.jpg", caption="Metrics")
+    st.subheader("Analysis")
+    st.write("""The random forest model was accurate in certain areas, but showed that it could improve in others.
+     Non-transitional state detection showed greater accuracy compared to transition states. 
+    It had difficulty in differentiating similar movement during transition, but was able to do it with moderate accuracy.""")
+    
+    st.write("""The model was effective in detecting non-transitional states, which were sitting on the seat, and not on the seat. 
+    It was good at classification, but it had lower performance when it came to onboarding and offboarding. """)
+
+
 # Gantt chart section with link
-with st.expander("Gantt Chart"):
+with st.expander("Gantt Chart: Midterm Report"):
    st.markdown("[View Gantt Chart in Google Sheets](https://docs.google.com/spreadsheets/d/1pWEyieNCmKAQnlG2C3LrY10Mgpy52Tdx/edit?usp=sharing&ouid=108969903742919067214&rtpof=true&sd=true)")
 
 # Contribution table
-with st.expander("Contribution Table"):
+with st.expander("Contribution Table: Midterm Report"):
    st.table(df)
 
 # Proposal Video
