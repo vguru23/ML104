@@ -225,7 +225,7 @@ with st.expander("Proposal Video"):
    st.markdown("[View Video on Youtube](https://youtu.be/OhnM3QEBTxs)")
 
 with st.expander("Final Video"):
-   st.markdown("[View Video on Youtube](https://youtu.be/OhnM3QEBTxs)")
+   st.markdown("[View Video on Youtube](https://www.youtube.com/watch?v=IlLz8DvxTBg)")
 
 # Citations
 with st.expander("Citations"):
