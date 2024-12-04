@@ -97,23 +97,26 @@ with st.expander("Data Preprocessing Methods"):
 
     - **COP X-Axis**:
         ```
-        COP_X = (Σ (F_i * X_i)) / Σ F_i
+        COPx = (Sensor2 + Sensor4 - Sensor1 + Sensor3) / sum of sensor values
+                
         ```
     - **COP Y-Axis**:
         ```
-        COP_Y = (Σ (F_i * Y_i)) / Σ F_i
+        COP_Y = (Sensor2 - Sensor4 - Sensor1 + Sensor3) / sum of sensor values
         ```
 
-    Where:
-    - \( F_i \) is the force value from each sensor.
-    - \( X_i, Y_i \) are the positions of the sensors relative to a defined coordinate system.
+    
 
-    To ensure accuracy, data points with COP values outside the range \([-2, 2]\) were removed, as these suggest that the user is not near the toilet seat.
 
     By calculating COP, we can:
     - Monitor balance during activities.
     - Detect irregularities in pressure distribution due to external factors or physical conditions.
     - Provide meaningful insights for feedback or training systems.
+    """)
+
+    st.subheader("Data Filtering")
+    st.write("""
+    To ensure accuracy, data points with COP values outside the range \([-2, 2]\) were removed, as these suggest that the user is not near the toilet seat. In our grid, the origin represents the center of the toilet seat so points beyond -2,2 mean the user is not neat the seat. This filters out unnecessary datapoints.
     """)
 
 
