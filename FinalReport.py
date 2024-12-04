@@ -210,7 +210,7 @@ with st.expander("Results: Final Report"):
 
     st.subheader("Comparison of Models and Next Steps")
     st.write("""After building all three models it is clear overall the random forest model performed the best, closely followed by XGBoost model, and finally SVM. However, in terms of precision and f1-score for the transitional phases(onboard and offboarding), XGBoost model performed the best. Throughout all 3 models, it is very clear that compared to sitting and not sitting classes, the accuracy in identifying the transitional phases was very low. 
-    This is why in our next steps we aim to add more data to capture the onboard/offboard period and maybe include users onboarding and offboarding toilet seat multiple times to lessen sitting class and increase transitional classes.
+    This is why in our next steps we aim to add more data to capture the onboard/offboard period and maybe include users onboarding and offboarding toilet seat multiple times to lessen sitting class and increase transitional classes.""")
 
 
 # Gantt chart section with link
