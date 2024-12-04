@@ -8,11 +8,11 @@ st.set_page_config(layout="wide")
 data = {
     "Name": ["Saloni Jain", "Sneha Pal", "Sooriya Senthilkumar", "Aneesh Sabarad", "Vibha Guru"],
     "Contribution": [
-        "Worked on M1 Data Cleaning",
-        "Worked on M1 Coding",
-        "Worked on M1 Feature Reduction",
-        "Worked on Results Evaluation",
-        "Worked on M1 Data Visualization"
+        "M1 Data Cleaning, M2 Feature Reduction, M3 Data Visualization",
+        "M1 Coding, M2 Data Visualization, M3 Coding",
+        "M1 Feature Reduction, M2 Coding, M3 Results",
+        "M1 Results Evaluation, M2 Results, M3 Data Cleaning",
+        "M1 Data Visualization, M2 Data Cleaning, M3 Feature Reduction"
     ]
 }
 
@@ -21,20 +21,43 @@ df = pd.DataFrame(data)
 
 # Centered title using HTML
 st.markdown(
-    "<h1 style='text-align: center;'>Group 104 - ML Proposal</h1>", 
+    "<h1 style='text-align: center;'>Group 104 - ML Final Report</h1>", 
     unsafe_allow_html=True
 )
 
-# Sections with dropdowns
-with st.expander("Introduction and Literature Review"):
+# Introduction / Background
+with st.expander("Introduction / Background"):
     st.write("""
-    People's physical capabilities change over time, which can be challenging for those with disabilities or chronic conditions. 
-    Therefore, a dynamic smart bathroom environment can be beneficial for health monitoring and diagnosing[1]. 
-    In addition, monitoring physical activity with sensors and force readings can help create tailored treatments quickly and in real time[2]. 
-    A smart bathroom environment can also be used for documenting physical data and identifying behavioral changes[3]. 
-    The goal of our research is to develop a machine learning model that classifies movement as a person sits on the toilet into three classes: 
-    sitting, offboarding, and onboarding to identify movement patterns in adults with physical impairments.
+
+    Smart home technologies, including sensors embedded in toilets, chairs, and beds, are gaining traction for health monitoring, particularly for the elderly or those with chronic conditions. 
+             
+    As people age or develop disabilities, their physical capabilities change, and a smart bathroom environment with health monitoring features could play a crucial role in addressing these challenges. 
+             Our focus is on using sensors and force readings to monitor physical activity, enabling real-time health assessments and tailored treatments.
+
+    These systems can track daily activities, provide feedback, and trigger alerts when abnormal behavior is detected. Existing research shows that sensor-based systems can identify changes in physical activity, offering valuable data for caregivers and healthcare professionals. However, challenges remain in accurately classifying and interpreting movement patterns, especially for people with physical impairments. This study aims to leverage machine learning to enhance sensor data analysis, improve classification accuracy, and reduce false positives.
     """)
+    
+with st.expander("Motivation"):
+    st.write("""
+    The purpose of this research is to detect unexpected behaviors such as abnormal sitting or rising patterns in participants with physical disabilities. 
+    This offers several key benefits that drive the motivation for our study:
+    - **Health Monitoring**: Using sensor data for real-time health monitoring to help detect unexpected behaviors such as abnormal sitting or rising patterns in participants indicating health deterioration.
+    - **Behavioral Insights**: Analyzing long-term movement patterns of those with disabilities to identify patterns or changes in movement that can help understand the needs of patients and develop more effective treatments [3].
+    - **Preventative Care**: Using alert systems that notify family members or caretakers in the event of a fall or prolonged sitting can help prevent further health deterioration.
+    """)
+
+# Problem Definition Section
+with st.expander("Problem Definition"):
+    st.write("""
+    The problem at hand is to develop a machine learning model that can accurately classify different movement states of an individual sitting on a toilet, using sensor data. These movements include:
+    - **Sitting**: The person is seated on the toilet.
+    - **Offboarding**: The person is leaving the seat.
+    - **Onboarding**: The person is approaching and sitting on the seat.
+    - **Not on Toilet**: The person is not seated on the toilet.
+
+    The primary challenge is to create a model that can accurately classify these states based on sensor data, while minimizing false positives and ensuring that abnormal behaviors, such as prolonged sitting or difficulties in standing, are detected. This is especially important for individuals with physical impairments, as it can enable timely interventions and improved care.
+    """)
+
 
 with st.expander("Dataset Description"):
     st.write("""
@@ -45,104 +68,100 @@ with st.expander("Dataset Description"):
     """)
     st.write("Dataset Link: https://tinyurl.com/toiletseatdata")
 
-with st.expander("Problem and Motivation"):
-    st.write("""
-    The purpose of this research is to detect unexpected behaviors such as abnormal sitting or rising patterns in participants with physical disabilities. 
-    This technology can be integrated into alarm systems that alert family members or caretakers in the event of a fall or prolonged sitting. 
-    In addition, this technology can help monitor changes in movement patterns of those with disabilities to monitor long term health.
-    """)
+
+
+
+st.title("Methods")
 
 with st.expander("Data Preprocessing Methods"):
     st.subheader("Data Cleaning and Selection")
     st.write("""
-    We will remove all columns except the last 4 toilet seat data and time columns. 
-    We will convert the Unix timestamp to the number of seconds passed since data collection began.
+    The raw sensor data often contains noise and irrelevant features. Therefore, in order to optimize model performance:
+    - We removed all unnecessary columns, leaving only the timestamps and the four critical sensor values. For instance, columns such as floor tile data and grab bar data, which were irrelevant to our goal of investigating movement patterns specific to the toilet seat, were excluded.
+    - The data was filtered to remove outliers that were outside the normal range, as well as any invalid sensor readings, to ensure the integrity of the dataset.
+    - Timestamps with missing or invalid data were removed.
+    - The filtered data was then compiled into a single CSV file for consistency and ease of analysis.
+    - To standardize timestamps across different trials and make them easier to process, Unix timestamps were converted into the number of seconds since data collection began.
     """)
 
-    st.subheader("Noise Reduction")
+    st.subheader("Feature Engineering")
     st.write("""
-    To reduce noise from the raw sensor data, we'll apply a low-pass filter. 
-    This will smooth out rapid fluctuations while preserving the overall trends in force measurements.
+    To enhance the model’s ability to identify patterns and reduce dimensionality:
+
+    - **Feature Extraction**: To simplify the analysis while retaining meaningful information, we calculated the **Center of Pressure (COP)** using the four sensor values. 
+        The COP provides a single metric that reflects the overall pressure distribution, offering insights into the user's approximate position on the toilet seat. Individual sensor values alone lack this context.
+        Additionally, we incorporated data points from 1-2 seconds prior to the current timestamp to capture transitional states, such as changes in weight or center of pressure (COP), over time.
+
+
+    The COP was calculated using the following formulas:
+
+    - **COP X-Axis**:
+        ```
+        COP_X = (Σ (F_i * X_i)) / Σ F_i
+        ```
+    - **COP Y-Axis**:
+        ```
+        COP_Y = (Σ (F_i * Y_i)) / Σ F_i
+        ```
+
+    Where:
+    - \( F_i \) is the force value from each sensor.
+    - \( X_i, Y_i \) are the positions of the sensors relative to a defined coordinate system.
+
+    To ensure accuracy, data points with COP values outside the range \([-2, 2]\) were removed, as these suggest that the user is not near the toilet seat.
+
+    By calculating COP, we can:
+    - Monitor balance during activities.
+    - Detect irregularities in pressure distribution due to external factors or physical conditions.
+    - Provide meaningful insights for feedback or training systems.
     """)
 
-    st.subheader("Feature Extraction")
-    st.write("""
-    We'll calculate the Center of Pressure (COP) using the four load sensor values to calculate a single metric 
-    representing the overall pressure distribution.
-    """)
+
 
 with st.expander("ML Models/Algorithms"):
     st.subheader("Random Forest")
     st.write("""
-    We'll use scikit-learn's RandomForestClassifier to differentiate between the three states (onboarding, sitting, off-boarding). 
-    Random forests can capture non-linear relationships in data.
-    """)
+        The first model we decided to implement was the Random Forest classifier, using scikit-learn's RandomForestClassifier method. Random Forest was chosen for this study to its ability to handle non-linear relationships inherent to movement data which was necessary for our datset 
+    that analyzed complex data like the center of pressure (COP) values and time differences. Additionally, the RF model is able to handle imbalanced datasets when compared to other classification based models; this 
+    was necessary for our dataset because we had a lot more data points for sitting and not on toilet states in comparison to off-boarding and onboarding states. Lastly, this model allowed us to adjust class weights to avoid overrepresenting the more frequent classes relative
+    to the lesser ones. 
+    
+    The three features that were used were Time_Diff_Milliseconds (tracking how much time as passed), COP_X (left to right weight distribution), COP_Y( front and back weight distribution). 
+    The hyperparameters specified for the model include estimators at 200, a random_state at 42 (arbitrary randomness metric), and class_weights to have balanced results(higher importance for certain movements). 
+    
+    While Training the model, we used 80% of the data for training, while the rest was used as testing data. We also made sure to adjust class weights if needed, as well as cross valdiate to make sure the model performed well.
+        """)
 
     st.subheader("Support Vector Machine (SVM)")
     st.write("""
-    We'll implement an SVM using scikit-learn's SVC class which is accurate at finding optimal segments between classes in high-dimensional spaces.
+    The second machine learning model we implemented was the Support Vector Machine (SVM). The SVM model was chosen for its ability to handle non-linear data and generalize well in high-dimensional spaces. 
+    SVM can effectively separate classes, and its performance with limited data makes it suitable for applications where overfitting needs to be controlled. It is particularly useful for datasets where distinguishing between
+    classes requires finding a decision boundary that maximizes the margin between them.
+
+    We used a radial basis function (RBF) kernel, a common kernel function for SVM. This kernel can handle non-linearly separable data by projecting it into a higher-dimensional space where it can be separated using a hyperplane. 
+    The RBF function computes the dot product and squared distances between features in the dataset, and then performs classification using linear SVM. Similar to Random Forest, class weights can be adjusted to handle class imbalances.
+
+    Another step we implemented was cross-validation, where the dataset was divided into equal splits. For each split, the model was trained on some portions of the data and tested on the remaining split. 
+    This helps reduce overfitting and ensures reliable performance. Cross-validation is particularly important for SVM models, as they are sensitive to hyperparameters, and this approach helps evaluate performance in a more robust way.
     """)
 
-    st.subheader("Logistic Regression")
+    st.subheader("XGBoost")
     st.write("""
-    We will use scikit-learn's LogisticRegression as a baseline model. 
-    Logistic regression can serve as a good comparison point for more complex models.
+    The last model we used was XGBoost, which is known for being effective in both regression and classification tasks. 
+    The model works by building trees sequentially, with each tree improving on the previous one. The importance of each feature is understood over time as the model identifies which features contribute the most.
+
+    XGBoost was our third chosen model because it is highly effective with structured datasets and can mitigate overfitting. 
+    We believed that the repetitive process of capturing relationships within the data over each tree (and improving each tree sequentially) made XGBoost a better model than the logistic regression model we originally implemented. 
+    Logistic regression assumes a linear relationship in the data, which makes it difficult to recognize non-linear patterns. On the other hand, XGBoost can learn complex relationships between features and handle these non-linear patterns more effectively.
+
+    There are several parameters used to build these trees in sequence, including the number of estimators, learning rate, max depth, and weights. The number of estimators determines the number of trees the model will build, 
+    which increases the model's ability to learn complex patterns but also opens up the risk of overfitting. The learning rate indicates the size of the update with each sequential tree—lower learning rates result in slower convergence. 
+    The max depth parameter limits the depth of each tree, which affects the number of splits in a tree. Deeper trees tend to have more splits but also have a higher chance of overfitting. It is important to note that trees with low depth may 
+    lead to underfitting, as they may not be complex enough to capture important patterns.
     """)
 
-with st.expander("Quantitative Metrics"):
-    st.subheader("Precision")
-    st.write("Ratio of correctly predicted positive instances to total predicted positive instances.")
-    st.write("(true positives) / (false positives + true positives)")
 
-    st.subheader("Accuracy")
-    st.write("Ratio of correctly predicted instances to total number of instances")
-    st.write("(true positives + true negatives) / all instances")
-
-    st.subheader("F1 Score")
-    st.write("Mean of precision and recall")
-    st.write("(F1 Score=2×(precision*recall / precision + recall)")
-
-    st.subheader("Recall")
-    st.write("Ratio of correctly predicted positive instances to all actual positive instances")
-    st.write("(true positives) / (false negatives + true positives)")
-
-with st.expander("Project Goals and Expected Results"):
-    st.write("""
-    The project goal would be to have overall high precision and accuracy which therefore leads to a high F1 score. 
-    A high recall is also important because of the need to minimize the number of false negatives in a medical setting. 
-    One ethical consideration is if the model is wrong and does not find when a participant is struggling with their movement patterns. 
-    Conversely, the model could wrongly identify patients with abnormal movement patterns. 
-    For expected results, the model should be able to classify a time range in which a participant is getting on/off the toilet seat.
-    """)
-
-#midterm report
-with st.expander("Methods: Midterm Report"):
-    st.subheader("Data Preprocessing")
-    st.write("""The force sensor readings from toilet seat sensors in CSV format, which was organized by each participant and timestamps. 
-        Unncessary colums were removed from the data, leaving only the timestamps as well as the four sensor values. 
-        Outliers that were outside the normal range were removed, as well as any invalid sensor reading.""")
-    st.write("""The filtered data was then compiled into a single CSV file. The next step was to calculate the center of pressure 
-        for the sensor readings in regards to the X and Y axis. These features will be considered COP_X and COP_Y. This was done by 
-        adding up all sensor readings based on the physical layout of the sensors, and dividing it by the sum all 4 sensor readings for 
-        that particular datapoint. Timestamps with missing data/data outside the normal range were removed.""")
-    st.write("""Data was labeled based on the various categories with not being on the seat was considered the default state.
-        The other three categories were onboarding, sitting, and offboard. The dataset was then labeled by assigning each data point a state based on the timestamp ranges. """)
-    
-
-    st.subheader("Ml Model: Random Forest")
-    st.write("""The first model we decided to implement was the random forest classifier, using scikit-learn's randomforestclassifier method. 
-    The three features that were used were Time_Diff_Milliseconds (tracking how much time as passed), COP_X(left to right weight distribution), COP_Y(front and back weight distribution). 
-    The hyperparameters specified for the model include estimators at 200, a random_state at 42 (arbitrary randomness metric), and class_weights to have balanced results(higher importance for certain movements). 
-    While Training the model, we used 80% 
-    of the data for training, while the rest was used as testing data. 
-    We also made sure to adjust class weights if needed, 
-    as well as cross valdiate to make sure the model performed well.
-    We chose the random forest model because it had the capacity to perform well with non-linear patterns. This non-linear relationship applies to our dataset and the features we had including
-    center of pressure and time differences. It also allowed us to compare how important each of the features were in producing the results given which is important for analysis.
-    The random forest model also allowed us to adjust class weights to better optimize the model to be more accurate and avoid overrepresenting the more frequent classes relative
-    to the lesser ones. These purposes all together is why the Random Forest model was appealing to utilize in this case.""")
-
-with st.expander("Results: Midterm Report"):
+with st.expander("Results: Final Report"):
     st.subheader("Visualizations")
     st.write("""The confusion matrix is one way we can visualize the results of the model depicting the relationship between the predicted label and the true label of the classification.
     The values in the matrix that provide the most value to us are along the diagonal. A strong diagonal pattern in the confusion matrix indicates good classification, which is generally true in this case.
@@ -186,11 +205,11 @@ with st.expander("Results: Midterm Report"):
 
 
 # Gantt chart section with link
-with st.expander("Gantt Chart: Midterm Report"):
+with st.expander("Gantt Chart: Final Report"):
    st.markdown("[View Gantt Chart in Google Sheets](https://docs.google.com/spreadsheets/d/1pWEyieNCmKAQnlG2C3LrY10Mgpy52Tdx/edit?usp=sharing&ouid=108969903742919067214&rtpof=true&sd=true)")
 
 # Contribution table
-with st.expander("Contribution Table: Midterm Report"):
+with st.expander("Contribution Table: Final Report"):
    st.table(df)
 
 # Proposal Video
