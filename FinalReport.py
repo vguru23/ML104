@@ -71,7 +71,7 @@ with st.expander("Dataset Description"):
 
 
 
-st.title("Methods")
+
 
 with st.expander("Data Preprocessing Methods"):
     st.subheader("Data Cleaning and Selection")
